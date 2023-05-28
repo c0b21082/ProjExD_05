@@ -46,6 +46,23 @@ class Block(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
+
+class Score:
+    """
+    時間経過で増えていくスコアと
+    プレイヤー死亡時の最終スコアの表示
+    """
+    def __init__(self):
+        self.score = 0
+        self.font = pg.font.Font(None, 36)
+
+    def increase(self, points):
+        self.score += points
+
+    def render(self, surface, pos):
+        score_surface = self.font.render("Score: " +str(self.score), True, (255, 255, 255))
+        surface.blit(score_surface, pos)
+
 def main():
     pg.display.set_caption("proto")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -64,12 +81,19 @@ def main():
     for b in blocks:
         all_rect_lst.append(b.rect)
 
+    score = Score()
+
     tmr = 0
     clock = pg.time.Clock()
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return 0
+            elif event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    return 0
+                elif event.key == pg.K_TAB:
+                    main()
         
 
         key_lst = pg.key.get_pressed()
@@ -89,14 +113,16 @@ def main():
         screen.blit(bg_img, (0, 0))
         blocks.draw(screen)
         screen.blit(player.image, player.rect)
+        score.render(screen, (WIDTH - 150, 10))
         pg.display.update()
 
         tmr += 1
+        if tmr % 60 == 0:
+            score.increase(1)
         clock.tick(60)
+
+    pg.quit()
 
 if __name__ == "__main__":
     pg.init()
     main()
-    pg.quit()
-    sys.exit()
-    
